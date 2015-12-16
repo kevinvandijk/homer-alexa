@@ -1,0 +1,19 @@
+{
+  "name": "homer-alexa",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "author": "Kevin van Dijk",
+  "license": "",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "./node_modules/.bin/nodemon"
+  },
+  "dependencies": {
+    "alexa-app": "^2.2.0",
+    "node-fetch": "^1.3.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.8.1"
+  }
+}
