@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "alexa-app": "^2.2.0",
-    "node-fetch": "^1.3.3"
+    "alexa-app-server": "^2.2.4"
   },
   "devDependencies": {
     "nodemon": "^1.8.1"
