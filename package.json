@@ -11,9 +11,18 @@
   },
   "dependencies": {
     "alexa-app": "^2.2.0",
-    "alexa-app-server": "^2.2.4"
+    "alexa-app-server": "^2.2.4",
+    "dotenv": "^1.2.0"
   },
   "devDependencies": {
-    "nodemon": "^1.8.1"
+    "aws-sdk": "^2.2.25",
+    "del": "^2.2.0",
+    "gulp": "^3.9.0",
+    "gulp-install": "^0.6.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-util": "^3.0.7",
+    "gulp-zip": "^3.0.2",
+    "nodemon": "^1.8.1",
+    "run-sequence": "^1.1.5"
   }
 }
