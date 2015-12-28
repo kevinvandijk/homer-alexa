@@ -1,9 +1,6 @@
 var alexa = require('alexa-app');
-var Promise = require('bluebird');
-var fetch = require('node-fetch');
 var dotenv = require('dotenv');
-
-fetch.Promise = Promise;
+var request = require('request-promise');
 
 dotenv.load();
 
@@ -36,23 +33,29 @@ app.intent('startShowOrMovie', {
     'play {homeland|NAME}'
   ]
 }, function(req, res) {
+  var name = req.slot('NAME');
   var params = {
-    name: req.slot('NAME')
+    name: name
   };
 
-  fetch(apiUrl('start'), {
-    method: 'post',
+  var options = {
+    method: 'POST',
+    uri: apiUrl('start'),
     headers: {
       'Content-Type': 'application/json;charset=UTF-8'
     },
-    body: JSON.stringify(params)
-  }).then(function(response) {
-    return response.json();
-  }).then(function(response) {
-    res.say('Playing');
+    body: params,
+    json: true
+  };
+
+  request(options).then(function(response) {
     res.send();
-  }).catch(function(error) {
-    res.say('Something went wrong');
+  }).catch(function(response) {
+    var error = response.error;
+    if (error.errorType === 'no-media-found') {
+      res.say('I\'m sorry but I couldn\'t find ' + name + ' between your movies or tv shows');
+    }
+    console.log('error', response.error);
     res.send();
   });
 
