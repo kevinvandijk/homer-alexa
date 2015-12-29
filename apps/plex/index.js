@@ -83,12 +83,14 @@ app.intent('Yes', {
   }
 
   if (data.onYes === 'startByKey') {
+    var media = data.media;
     var params = {
-      key: data.key
+      key: media.key
     };
 
     startShowOrMovie(params).then(function() {
-      res.say('Enjoy watching ' + data.title + '!');
+      res.say('Enjoy watching ' + media.title + '!');
+      res.send();
     }).catch(function(reply) {
       res.say(reply.say);
       res.shouldEndSession(reply.shouldEndSession);
@@ -127,7 +129,7 @@ app.intent('StartShowOrMovie', {
   };
 
   startShowOrMovie(params, res).then(function(reply) {
-    res.say(reply.say);
+    res.say('Enjoy watching ' + reply.title + '!');
     res.send();
   }).catch(function(reply) {
     res.say(reply.say);
