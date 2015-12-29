@@ -51,11 +51,18 @@ app.intent('startShowOrMovie', {
   request(options).then(function(response) {
     res.send();
   }).catch(function(response) {
+    var alexaReply = 'I\'m sorry but something went wrong.';
     var error = response.error;
-    if (error.errorType === 'no-media-found') {
-      res.say('I\'m sorry but I couldn\'t find ' + name + ' between your movies or tv shows');
+    switch (error.type) {
+      case 'no-name-specified':
+        alexaReply = 'I\'m sorry but I didn\'t catch that. Which movie or show did you want to watch?';
+        break;
+      case 'multiple-media-found':
+        alexaReply = 'I\'m not sure what you meant. Did you want to watch the ' + error.suggestion.type + ': ' + error.suggestion.title + '?';
+        break;
     }
-    console.log('error', response.error);
+
+    res.say(alexaReply);
     res.send();
   });
 
