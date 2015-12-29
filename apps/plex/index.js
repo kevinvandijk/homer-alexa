@@ -57,8 +57,10 @@ app.intent('startShowOrMovie', {
       case 'no-name-specified':
         alexaReply = 'I\'m sorry but I didn\'t catch that. Which movie or show did you want to watch?';
         break;
-      case 'multiple-media-found':
-        alexaReply = 'I\'m not sure what you meant. Did you want to watch the ' + error.suggestion.type + ': ' + error.suggestion.title + '?';
+      case 'not-certain':
+        response.shouldEndSession(false);
+        var typeText = '' + (error.suggestion.type === 'movie' ? '' : 'an episode of ') + error.suggestion.title;
+        alexaReply = 'I\'m not sure what you meant. Did you want to watch ' + typeText + '?';
         break;
     }
 
