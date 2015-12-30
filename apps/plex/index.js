@@ -224,7 +224,7 @@ app.intent('Restart', {
       restart: true
     };
 
-    intentHelpers.startSHowOrMovie(req, res, params);
+    intentHelpers.startShowOrMovie(req, res, params);
   }
 });
 
