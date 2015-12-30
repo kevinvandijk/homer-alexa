@@ -46,8 +46,9 @@ var requestHelpers = {
             break;
 
           case 'partially-watched-episode':
+            // TODO: Restart option for current episode
             var episode = error.media;
-            say = 'You didn\'t finish episode ' + episode.episode + ' of season ' + episode.season + '. Do you want to resume it or start the next episode?';
+            say = 'You didn\'t finish episode ' + episode.episode + ' of season ' + episode.season + ' the last time you watched it. Do you want to resume it or start the next episode?';
             data = {
               onResume: 'resumeByKey',
               onNext: 'startNext',
@@ -62,6 +63,17 @@ var requestHelpers = {
             data = {
               onYes: 'restartByKey',
               key: show.showKey
+            };
+            shouldEndSession = false;
+            break;
+
+          case 'partially-watched-movie':
+            var movie = error.media;
+            say = 'You didn\'t finish ' + movie.title + ' the last time you watched it. Do you want to resume it or start over?';
+            data = {
+              onResume: 'resumeByKey',
+              onRestart: 'restartByKey',
+              key: movie.key
             };
             shouldEndSession = false;
             break;
@@ -181,7 +193,7 @@ app.intent('Next', {
   ]
 }, function(req, res) {
   var data = intentHelpers.getSessionData(req, res);
-  if (data) return res.send();
+  if (!data) return res.send();
 
   if (data.onNext === 'startNext') {
     var params = {
@@ -193,6 +205,26 @@ app.intent('Next', {
   } else {
     res.say('Sorry, I don\'t know what you mean.');
     res.send();
+  }
+});
+
+app.intent('Restart', {
+  utterances: [
+    '{start over}|{start again}',
+    '{restart|restart it}',
+    '{rewatch|rewatch it}'
+  ]
+}, function(req, res) {
+  var data = intentHelpers.getSessionData(req, res);
+  if (!data) return res.send();
+
+  if (data.onRestart === 'restartByKey') {
+    var params = {
+      key: data.key,
+      restart: true
+    };
+
+    intentHelpers.startSHowOrMovie(req, res, params);
   }
 });
 
