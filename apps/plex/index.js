@@ -116,7 +116,7 @@ var intentHelpers = {
     return data;
   },
 
-  startShowOrMovie(req, res, params) {
+  startShowOrMovie: function(req, res, params) {
     requestHelpers.startShowOrMovie(params).then(function(reply) {
       res.say('Enjoy watching ' + reply.title + '!');
       res.send();
