@@ -38,7 +38,6 @@ var requestHelpers = {
             var suggestion = error.suggestion;
             data = {
               onYes: 'startByKey',
-              onNo: '',
               key: suggestion.key
             };
             shouldEndSession = false;
@@ -62,7 +61,6 @@ var requestHelpers = {
             say = 'You have no unwatched ' + show.title + ' episodes left. Do you want to restart this show from the beginning?';
             data = {
               onYes: 'restartByKey',
-              onNo: 'ok',
               key: show.showKey
             };
             shouldEndSession = false;
@@ -200,15 +198,14 @@ app.intent('Next', {
 
 app.intent('No', {
   utterances: [
-    'no|nope',
+    'no|nope|nah',
     'restart',
     'start the next one'
   ]
 }, function(req, res) {
   var data = intentHelpers.getSessionData(req, res);
   if (!data) return res.send();
-
-
+  if (!data.onNo) return res.send();
 });
 
 app.intent('StartShowOrMovie', {
