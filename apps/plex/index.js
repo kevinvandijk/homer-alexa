@@ -231,8 +231,8 @@ app.intent('Restart', {
 app.intent('No', {
   utterances: [
     'no|nope|nah',
-    'restart',
-    'start the next one'
+    'start the next one',
+    '{nevermind|never mind}'
   ]
 }, function(req, res) {
   var data = intentHelpers.getSessionData(req, res);
