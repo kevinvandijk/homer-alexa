@@ -9,52 +9,76 @@ function apiUrl(path) {
   return process.env.HOMER_ADDRESS + '/api/plex/' + path;
 };
 
-function startShowOrMovie(params) {
-  return new Promise(function(resolve, reject) {
-    var requestOptions = {
-      method: 'POST',
-      uri: apiUrl('start'),
-      headers: {
-        'Content-Type': 'application/json;charset=UTF-8'
-      },
-      body: params,
-      json: true
-    };
-
-    request(requestOptions).then(function(body) {
-      resolve(body);
-    }).catch(function(body) {
-      var say = 'I\'m sorry but something went wrong.';
-      var data;
-      var shouldEndSession = true;
-      var error = body.error;
-      switch (error.type) {
-        case 'no-name-or-key-specified':
-          say = 'I\'m sorry but I didn\'t catch that.';
-          break;
-        case 'not-certain':
-          var suggestion = error.suggestion;
-          data = {
-            onYes: 'startByKey',
-            onNo: '',
-            media: suggestion
-          };
-          shouldEndSession = false;
-          var typeText = '' + (suggestion.type === 'movie' ? '' : 'an episode of ') + suggestion.title;
-          say = 'I\'m not sure what you meant. Did you want to watch ' + typeText + '?';
-          break;
-      }
-
-      var reply = {
-        say: say,
-        data: data,
-        shouldEndSession: shouldEndSession
+var requestHelpers = {
+  startShowOrMovie: function(params) {
+    return new Promise(function(resolve, reject) {
+      var requestOptions = {
+        method: 'POST',
+        uri: apiUrl('start'),
+        headers: {
+          'Content-Type': 'application/json;charset=UTF-8'
+        },
+        body: params,
+        json: true
       };
-      reject(reply);
-    });
-  });
-};
 
+      request(requestOptions).then(function(body) {
+        resolve(body);
+      }).catch(function(body) {
+        var say = 'I\'m sorry but something went wrong.';
+        var data;
+        var shouldEndSession = true;
+        var error = body.error;
+        switch (error.type) {
+          case 'no-name-or-key-specified':
+            say = 'I\'m sorry but I didn\'t catch that.';
+            break;
+
+          case 'not-certain':
+            var suggestion = error.suggestion;
+            data = {
+              onYes: 'startByKey',
+              onNo: '',
+              key: suggestion.key
+            };
+            shouldEndSession = false;
+            var typeText = '' + (suggestion.type === 'movie' ? '' : 'an episode of ') + suggestion.title;
+            say = 'I\'m not sure what you meant. Did you want to watch ' + typeText + '?';
+            break;
+
+          case 'partially-watched-episode':
+            var episode = error.media;
+            say = 'You didn\'t finish episode ' + episode.episode + ' of season ' + episode.season + '. Do you want to resume it or start the next episode?';
+            data = {
+              onResume: 'resumeByKey',
+              onNext: 'startNext',
+              key: episode.showKey
+            };
+            shouldEndSession = false;
+            break;
+
+          case 'no-unwatched-episode':
+            var show = error.media;
+            say = 'You have no unwatched ' + show.title + ' episodes left. Do you want to restart this show from the beginning?';
+            data = {
+              onYes: 'restartByKey',
+              onNo: 'ok',
+              key: show.showKey
+            };
+            shouldEndSession = false;
+            break;
+        }
+
+        var reply = {
+          say: say,
+          data: data,
+          shouldEndSession: shouldEndSession
+        };
+        reject(reply);
+      });
+    });
+  }
+};
 var app = new alexa.app('homer-plex');
 
 app.pre = function(req, res, type) {
@@ -70,26 +94,21 @@ app.launch(function(req, res) {
   res.shouldEndSession(false);
 });
 
-app.intent('Yes', {
-  utterances: [
-    '{yes|yeah|okay|yes please|indeed|I did}'
-  ]
-}, function(req, res) {
-  var data = req.session('data');
+var intentHelpers = {
+  getSessionData: function(req, res) {
+    var data = req.session('data');
 
-  if (!data) {
-    res.say('Sorry, I don\'t remember what we were talking about, please start over');
-    return res.send();
-  }
+    if (!data) {
+      res.say('Sorry, I don\'t remember what we were talking about, please start over');
+      return false;
+    }
 
-  if (data.onYes === 'startByKey') {
-    var media = data.media;
-    var params = {
-      key: media.key
-    };
+    return data;
+  },
 
-    startShowOrMovie(params).then(function() {
-      res.say('Enjoy watching ' + media.title + '!');
+  startShowOrMovie(req, res, params) {
+    requestHelpers.startShowOrMovie(params).then(function(reply) {
+      res.say('Enjoy watching ' + reply.title + '!');
       res.send();
     }).catch(function(reply) {
       res.say(reply.say);
@@ -97,19 +116,98 @@ app.intent('Yes', {
       if (reply.data) res.session('data', reply.data);
       res.send();
     });
+  }
+};
+
+app.intent('Yes', {
+  utterances: [
+    '{yes|yeah|okay|yes please|indeed|I did}'
+  ]
+}, function(req, res) {
+  var data = intentHelpers.getSessionData(req, res);
+  if (!data) return res.send();
+  var params;
+
+  if (data.onYes === 'startByKey') {
+    params = {
+        key: data.key
+    };
+
+    intentHelpers.startShowOrMovie(req, res, params);
+  } else if (data.onYes === 'restartByKey') {
+    params = {
+      key: data.key,
+      restart: true
+    };
+
+    intentHelpers.startShowOrMovie(req, res, params);
   } else {
-    res.say('Sorry, I don\'t know what to do right now, please start over');
+    res.say('Sorry, I don\'t know what what you mean');
     res.send();
   }
 
   return false;
 });
 
-app.intent('No', {
+// TODO: Expand so it can be directly used as an entry by saying:
+// "Resume my last watched tv show / movie" or "Resume Movie name"
+app.intent('Resume', {
   utterances: [
-    'no|nope'
+    '{resume|resume it}',
+    '{continue|continue it}'
   ]
 }, function(req, res) {
+  var data = intentHelpers.getSessionData(req, res);
+  if (!data) return res.send();
+
+  if (data.onResume === 'resumeByKey') {
+    var params = {
+      key: data.key,
+      resume: true
+    };
+
+    intentHelpers.startShowOrMovie(req, res, params);
+  } else {
+    res.say('Sorry, I don\'t know what you mean.');
+    res.send();
+  }
+
+  return false;
+});
+
+app.intent('Next', {
+  utterances: [
+    '{the next one|the next|next}',
+    'start the next one',
+    'start a new one'
+  ]
+}, function(req, res) {
+  var data = intentHelpers.getSessionData(req, res);
+  if (data) return res.send();
+
+  if (data.onNext === 'startNext') {
+    var params = {
+      key: data.key,
+      nextEpisode: true
+    };
+
+    intentHelpers.startShowOrMovie(req, res, params);
+  } else {
+    res.say('Sorry, I don\'t know what you mean.');
+    res.send();
+  }
+});
+
+app.intent('No', {
+  utterances: [
+    'no|nope',
+    'restart',
+    'start the next one'
+  ]
+}, function(req, res) {
+  var data = intentHelpers.getSessionData(req, res);
+  if (!data) return res.send();
+
 
 });
 
@@ -128,15 +226,7 @@ app.intent('StartShowOrMovie', {
     name: name
   };
 
-  startShowOrMovie(params, res).then(function(reply) {
-    res.say('Enjoy watching ' + reply.title + '!');
-    res.send();
-  }).catch(function(reply) {
-    res.say(reply.say);
-    res.shouldEndSession(reply.shouldEndSession);
-    if (reply.data) res.session('data', reply.data);
-    res.send();
-  });
+  intentHelpers.startShowOrMovie(req, res, params);
 
   return false;
 });
