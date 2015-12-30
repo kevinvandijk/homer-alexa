@@ -121,7 +121,7 @@ var intentHelpers = {
       var media = reply.media;
       var mediaTitle = (media.type === 'episode' ? media.show + ': ' + media.title : media.title);
 
-      res.say('Enjoy watching ' + mediaTitle + '!');
+      res.say('Enjoy ' + mediaTitle + '!');
       res.send();
     }).catch(function(reply) {
       res.say(reply.say);
