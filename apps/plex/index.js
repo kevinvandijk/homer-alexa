@@ -209,6 +209,8 @@ app.intent('Next', {
     res.say('Sorry, I don\'t know what you mean.');
     res.send();
   }
+
+  return false;
 });
 
 app.intent('Restart', {
@@ -229,6 +231,8 @@ app.intent('Restart', {
 
     intentHelpers.startShowOrMovie(req, res, params);
   }
+
+  return false;
 });
 
 app.intent('No', {
