@@ -118,7 +118,10 @@ var intentHelpers = {
 
   startShowOrMovie: function(req, res, params) {
     requestHelpers.startShowOrMovie(params).then(function(reply) {
-      res.say('Enjoy watching ' + reply.title + '!');
+      var media = reply.media;
+      var mediaTitle = (media.type === 'episode' ? media.show + ': ' + media.title : media.title);
+
+      res.say('Enjoy watching ' + mediaTitle + '!');
       res.send();
     }).catch(function(reply) {
       res.say(reply.say);
