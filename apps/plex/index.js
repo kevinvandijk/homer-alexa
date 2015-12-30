@@ -25,13 +25,13 @@ var requestHelpers = {
       request(requestOptions).then(function(body) {
         resolve(body);
       }).catch(function(body) {
-        var say = 'I\'m sorry but something went wrong.';
+        var say = 'I\'m sorry, Homer did not respond.';
         var data;
         var shouldEndSession = true;
         var error = body.error;
         switch (error.type) {
           case 'no-name-or-key-specified':
-            say = 'I\'m sorry but I didn\'t catch that.';
+            say = 'I\'m sorry, I didn\'t catch that.';
             break;
 
           case 'not-certain':
@@ -42,13 +42,13 @@ var requestHelpers = {
             };
             shouldEndSession = false;
             var typeText = '' + (suggestion.type === 'movie' ? '' : 'an episode of ') + suggestion.title;
-            say = 'I\'m not sure what you meant. Did you want to watch ' + typeText + '?';
+            say = 'I\'m not sure what you mean. Do you want to watch ' + typeText + '?';
             break;
 
           case 'partially-watched-episode':
             // TODO: Restart option for current episode
             var episode = error.media;
-            say = 'You didn\'t finish episode ' + episode.episode + ' of season ' + episode.season + ' the last time you watched it. Do you want to resume it or start the next episode?';
+            say = 'You didn\'t finish episode ' + episode.episode + ' of season ' + episode.season + '. Do you want to resume it, or start the next episode?';
             data = {
               onResume: 'resumeByKey',
               onNext: 'startNext',
@@ -59,7 +59,7 @@ var requestHelpers = {
 
           case 'no-unwatched-episode':
             var show = error.media;
-            say = 'You have no unwatched ' + show.title + ' episodes left. Do you want to restart this show from the beginning?';
+            say = 'You have no unwatched ' + show.title + ' episodes left. Do you want to rewatch the show from the beginning?';
             data = {
               onRestart: 'restartByKey',
               key: show.showKey
@@ -69,7 +69,7 @@ var requestHelpers = {
 
           case 'partially-watched-movie':
             var movie = error.media;
-            say = 'You didn\'t finish ' + movie.title + ' the last time you watched it. Do you want to resume it or start over?';
+            say = 'You didn\'t finish ' + movie.title + '. Do you want to resume it, or restart it?';
             data = {
               onResume: 'resumeByKey',
               onRestart: 'restartByKey',
@@ -109,7 +109,7 @@ var intentHelpers = {
     var data = req.session('data');
 
     if (!data) {
-      res.say('Sorry, I don\'t remember what we were talking about, please start over');
+      res.say('Sorry, I don\'t remember what we were talking about, please start over.');
       return false;
     }
 
@@ -134,7 +134,13 @@ var intentHelpers = {
 
 app.intent('Yes', {
   utterances: [
-    '{yes|yeah|okay|yes please|indeed|I did}'
+    'yes',
+    'yeah',
+    'okay',
+    'ok',
+    'yes please',
+    'indeed',
+    'I did'
   ]
 }, function(req, res) {
   var data = intentHelpers.getSessionData(req, res);
@@ -155,7 +161,7 @@ app.intent('Yes', {
 
     intentHelpers.startShowOrMovie(req, res, params);
   } else {
-    res.say('Sorry, I don\'t know what what you mean');
+    res.say('Sorry, I don\'t know what you mean');
     res.send();
   }
 
@@ -166,8 +172,10 @@ app.intent('Yes', {
 // "Resume my last watched tv show / movie" or "Resume Movie name"
 app.intent('Resume', {
   utterances: [
-    '{resume|resume it}',
-    '{continue|continue it}'
+    'resume',
+    'resume it',
+    'continue',
+    'continue it'
   ]
 }, function(req, res) {
   var data = intentHelpers.getSessionData(req, res);
@@ -190,7 +198,9 @@ app.intent('Resume', {
 
 app.intent('Next', {
   utterances: [
-    '{the next one|the next|next}',
+    'the next one',
+    'the next',
+    'next',
     'start the next one',
     'start a new one'
   ]
@@ -215,9 +225,12 @@ app.intent('Next', {
 
 app.intent('Restart', {
   utterances: [
-    '{start over}|{start again}',
-    '{restart|restart it}',
-    '{rewatch|rewatch it}'
+    'start over',
+    'start again',
+    'restart',
+    'restart it',
+    'rewatch',
+    'rewatch it'
   ]
 }, function(req, res) {
   var data = intentHelpers.getSessionData(req, res);
@@ -237,9 +250,11 @@ app.intent('Restart', {
 
 app.intent('No', {
   utterances: [
-    'no|nope|nah',
-    'start the next one',
-    '{nevermind|never mind}'
+    'no',
+    'nope',
+    'nah',
+    'nevermind',
+    'never mind'
   ]
 }, function(req, res) {
   var data = intentHelpers.getSessionData(req, res);
