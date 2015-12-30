@@ -61,7 +61,7 @@ var requestHelpers = {
             var show = error.media;
             say = 'You have no unwatched ' + show.title + ' episodes left. Do you want to restart this show from the beginning?';
             data = {
-              onYes: 'restartByKey',
+              onRestart: 'restartByKey',
               key: show.showKey
             };
             shouldEndSession = false;
