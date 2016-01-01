@@ -2,6 +2,8 @@ var alexa = require('alexa-app');
 var dotenv = require('dotenv');
 var request = require('request-promise');
 var Promise = require('bluebird');
+var fs = require('fs');
+var path = require('path');
 
 dotenv.load();
 
@@ -90,6 +92,8 @@ var requestHelpers = {
   }
 };
 var app = new alexa.app('homer-plex');
+
+app.dictionary = JSON.parse(fs.readFileSync(path.join(__dirname, 'dictionary.json')));
 
 app.pre = function(req, res, type) {
   if (process.env.ALEXA_APP_ID) {
@@ -267,9 +271,9 @@ app.intent('StartShowOrMovie', {
     'NAME': 'LITERAL'
   },
   utterances: [
-    'start {homeland|NAME}',
-    'start playing {homeland|NAME}',
-    'play {homeland|NAME}'
+    'start {media|NAME}',
+    'start playing {media|NAME}',
+    'play {media|NAME}'
   ]
 }, function(req, res) {
   var name = req.slot('NAME');

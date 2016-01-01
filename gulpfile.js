@@ -7,6 +7,12 @@ var zip = require('gulp-zip');
 var AWS = require('aws-sdk');
 var fs = require('fs');
 var runSequence = require('run-sequence');
+var request = require('request-promise');
+var dotenv = require('dotenv');
+var fs = require('fs');
+var argv = require('yargs').argv;
+
+dotenv.load();
 
 gulp.task('clean', function(callback) {
   return del('dist',
@@ -76,13 +82,28 @@ gulp.task('upload', function(done) {
   });
 });
 
+gulp.task('fetchDictionaries', function(callback) {
+  request(process.env.HOMER_ADDRESS + '/api/plex/dictionary').then(function(response) {
+    fs.writeFileSync('apps/plex/dictionary.json', response);
+    callback();
+  }).catch(function(error) {
+    console.error(error);
+    callback();
+  });
+});
+
 gulp.task('deploy', function(callback) {
-  return runSequence(
-    'clean',
+  var tasks = ['clean'];
+
+  if (argv.dictionaries) tasks.push('fetchDictionaries');
+
+  tasks = tasks.concat([
     'js',
     ['npm', 'env'],
     'zip',
     'upload',
     callback
-  );
+  ]);
+
+  runSequence.apply(null, tasks);// );
 });
