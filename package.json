@@ -9,6 +9,9 @@
     "start": "node index.js",
     "dev": "./node_modules/.bin/nodemon"
   },
+  "engines": {
+    "node": "0.10"
+  },
   "dependencies": {
     "alexa-app": "^2.2.0",
     "alexa-app-server": "^2.2.4",
