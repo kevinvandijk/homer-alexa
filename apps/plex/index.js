@@ -69,7 +69,7 @@ var actions = {
     var playItem = item;
 
     if (item.type === 'show') {
-      var currentEpisode = item.meta.currentEpisode;
+      var currentEpisode = item.meta && item.meta.currentEpisode;
       if (!currentEpisode) return reply(res, 'can-not-restart-show-yet');
 
       playItem = item.meta.currentEpisode;
