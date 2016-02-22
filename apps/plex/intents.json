@@ -1,0 +1,59 @@
+{
+  "Next": {
+    "utterances": [
+      "the next one",
+      "the next",
+      "next",
+      "start the next one",
+      "start a new one"
+    ]
+  },
+  "No": {
+    "utterances": [
+      "no",
+      "nope",
+      "nah",
+      "nevermind",
+      "nevermind"
+    ]
+  },
+  "Restart": {
+    "utterances": [
+      "start over",
+      "start again",
+      "restart",
+      "restart it",
+      "rewatch",
+      "rewatch it"
+    ]
+  },
+  "Resume": {
+    "utterances": [
+      "resume",
+      "resume it",
+      "continue",
+      "continue it"
+    ]
+  },
+  "StartShowOrMovie": {
+    "slots": {
+      "NAME": "LITERAL"
+    },
+    "utterances": [
+      "start {media|NAME}",
+      "start playing {media|NAME}",
+      "play {media|name}"
+    ]
+  },
+  "Yes": {
+    "utterances": [
+      "yes",
+      "yeah",
+      "okay",
+      "ok",
+      "yes please",
+      "indeed",
+      "I did"
+    ]
+  }
+}
