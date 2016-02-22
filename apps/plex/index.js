@@ -27,9 +27,7 @@ createIntent('StartShowOrMovie', function(req, res) {
     if (media.length > 1) {
       reply(res, 'not-certain', media[0]);
     } else {
-      actions.play(res, media[0]).then(function(reply) {
-        console.log('result');
-      });
+      actions.play(res, media[0]);
     }
   }).catch(function(err) {
     console.log('error', err);
@@ -38,69 +36,88 @@ createIntent('StartShowOrMovie', function(req, res) {
   return false;
 });
 
-createIntent(['Yes', 'Resume'], function(req, res) {
-  var action = req.session('actions') && req.session('actions').Yes;
-  if (!action) reply(res, 'session-required');
-  var meta = req.session('meta');
+['Yes', 'Resume', 'Next', 'Restart'].map(function(name) {
+  createIntent(name, function(req, res) {
+    var action = req.session('actions') && req.session('actions')[name];
+    if (!action) return reply(res, 'session-required');
+    var meta = req.session('meta');
 
-  actions[action].apply(actions, [res, meta]);
-  return false;
+    actions[action].apply(actions, [res, meta]);
+    return false;
+  });
 });
 
-function createIntent(nameOrNames, cb) {
-  if (Array.isArray(nameOrNames)) {
-    nameOrNames.map(function(name) {
-      app.intent(name, intents[name], cb);
-    });
-  } else {
-    app.intent(nameOrNames, intents[nameOrNames], cb);
-  }
+function createIntent(name, cb) {
+  app.intent(name, intents[name], cb);
+}
+
+function playRequest(res, item, options) {
+  options = options || {};
+  var params = { id: item.id };
+  if (options.restart) params.restart = true;
+  // var something = reply.bind(null, res);
+
+  return helpers.apiRequest('GET', 'play', params).then(function(response) {
+    return reply(res, 'start-playing', response.data);
+  }).catch(function(err) {
+    return reply(res, 'general-error');
+  });
 }
 
 var actions = {
-  play: function(res, data) {
-    var params = { id: data.id };
-    if (data.resume) params.resume = true;
+  play: function(res, item, options) {
+    var playItem = item;
 
-    return helpers.apiRequest('GET', 'play', params).then(function(response) {
-      reply(res, 'start-playing', response.data.attributes);
-    }).catch(function(err) {
-      var body = err.error.errors[0];
+    if (item.type === 'show') {
+      var currentEpisode = item.meta.currentEpisode;
+      if (!currentEpisode) return reply(res, 'can-not-restart-show-yet');
 
-      if (err.statusCode === 412 && body.title === 'partially-watched') {
-        reply(res, 'ask-for-resume', data);
-      } else {
-        reply(res, 'general-error', data);
-      }
-    });
+      playItem = item.meta.currentEpisode;
+    }
+
+    if (playItem.attributes.viewOffset) {
+      return (playItem.type === 'episode'
+        ? reply(res, 'ask-for-episode-resume', item)
+        : reply(res, 'ask-for-movie-resume', item)
+      );
+    }
+
+    playRequest(res, playItem);
   },
 
-  resume: function(res, data) {
-    data.resume = true;
-    return this.play(res, data);
+  resumeCurrentEpisode: function(res, data) {
+    playRequest(res, data.currentEpisode);
+  },
+
+  nextEpisode: function(res, data) {
+    if (!data.nextEpisode) return reply(res, 'can-not-restart-show-yet');
+    playRequest(res, data.nextEpisode);
+  },
+
+  restartEpisode: function(res, data) {
+    playRequest(res, data.currentEpisode, { restart: true });
   }
 };
 
 function reply(res, type, data) {
   switch (type) {
-    case 'general-error':
-      res.say('Sorry, something went wrong. Please try again later.');
+    case 'can-not-restart-show-yet':
+      res.say('Sorry, I am too dumb to restart a show for now.');
       break;
 
     case 'start-playing':
-      res.say('Enjoy ' + data.title + '!');
+      res.say('Enjoy ' + data.attributes.title + '!');
       break;
 
-    case 'ask-for-resume':
-      res.say('You didn\'t finish watching last time. Do you want to resume it, or start the next episode?');
+    case 'ask-for-episode-resume':
+      res.say('You didn\'t finish watching last time. Do you want to continue, restart, or play the next episode?');
       res.session('actions', {
-        Yes: 'resume',
-        Resume: 'resume',
-        Next: 'next',
+        Yes: 'resumeCurrentEpisode',
+        Resume: 'resumeCurrentEpisode',
+        Next: 'nextEpisode',
+        Restart: 'restartEpisode'
       });
-      res.session('meta', {
-        id: data.id
-      });
+      res.session('meta', data.meta);
       res.shouldEndSession(false);
       break;
 
@@ -122,6 +139,10 @@ function reply(res, type, data) {
         id: data.id
       });
       res.shouldEndSession(false);
+      break;
+
+    default:
+      res.say('Sorry, something went wrong. Please try again later.');
       break;
   }
 

@@ -18,8 +18,6 @@ exports.apiRequest = function(method, path, body) {
     : ''
   );
 
-  console.log('url', url);
-
   var requestOptions = {
     method: method,
     uri: url,
