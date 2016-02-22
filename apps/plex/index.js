@@ -96,6 +96,14 @@ var actions = {
 
   restartEpisode: function(res, data) {
     playRequest(res, data.currentEpisode, { restart: true });
+  },
+
+  resumeMovie: function(res, data) {
+    playRequest(res, data);
+  },
+
+  restartMovie: function(res, data) {
+    playRequest(res, data, { restart: true });
   }
 };
 
@@ -112,12 +120,21 @@ function reply(res, type, data) {
     case 'ask-for-episode-resume':
       res.say('You didn\'t finish watching last time. Do you want to continue, restart, or play the next episode?');
       res.session('actions', {
-        Yes: 'resumeCurrentEpisode',
         Resume: 'resumeCurrentEpisode',
         Next: 'nextEpisode',
         Restart: 'restartEpisode'
       });
       res.session('meta', data.meta);
+      res.shouldEndSession(false);
+      break;
+
+    case 'ask-for-movie-resume':
+      res.say('You didn\'t finish watching last time. Do you want to continue or restart?');
+      res.session('actions', {
+        Resume: 'resumeMovie',
+        Restart: 'restartMovie'
+      });
+      res.session('meta', data);
       res.shouldEndSession(false);
       break;
 
