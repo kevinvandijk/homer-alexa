@@ -6,7 +6,7 @@ var helpers = require('./helpers');
 var intents = JSON.parse(fs.readFileSync(path.join(__dirname, 'intents.json')));
 
 var app = new alexa.app('homer-plex');
-app.dictionary = JSON.parse(fs.readFileSync(path.join(__dirname, 'dictionary.json')));
+app.dictionary = JSON.parse(fs.readFileSync(path.join(__dirname, 'dictionary.json'))).data;
 
 app.pre = function(req, res, type) {
   if (process.env.ALEXA_APP_ID) {
