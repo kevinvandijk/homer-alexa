@@ -82,9 +82,15 @@ gulp.task('upload', function(done) {
   });
 });
 
-gulp.task('fetchDictionaries', function(callback) {
+gulp.task('dictionary', function(callback) {
   request(process.env.HOMER_ADDRESS + '/api/plex/dictionary').then(function(response) {
-    fs.writeFileSync('apps/plex/dictionary.json', response);
+    return JSON.parse(response);
+  }).then(function(json) {
+    var output = '';
+    json.data.media.forEach(function(line) {
+      output = output + line + '\n';
+    });
+    fs.writeFileSync('apps/plex/dictionary.txt', output);
     callback();
   }).catch(function(error) {
     console.error(error);
@@ -95,7 +101,7 @@ gulp.task('fetchDictionaries', function(callback) {
 gulp.task('deploy', function(callback) {
   var tasks = ['clean'];
 
-  if (argv.dictionaries) tasks.push('fetchDictionaries');
+  if (argv.dictionaries) tasks.push('dictionary');
 
   tasks = tasks.concat([
     'js',

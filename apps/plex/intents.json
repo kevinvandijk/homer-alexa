@@ -37,7 +37,7 @@
   },
   "StartShowOrMovie": {
     "slots": {
-      "NAME": "LITERAL"
+      "NAME": "LIST_OF_MEDIA"
     },
     "utterances": [
       "start {media|NAME}",
