@@ -1,0 +1,31 @@
+{
+  "PowerDeviceOn": {
+    "slots": {
+      "DEVICE": "LIST_OF_DEVICES"
+    },
+    "utterances": [
+      "turn on {DEVICE}",
+      "turn on the {DEVICE}",
+      "turn on a {DEVICE}",
+      "power on {DEVICE}",
+      "power on the {DEVICE}",
+      "power on a {DEVICE}"
+    ]
+  },
+  "PowerDeviceOff": {
+    "slots": {
+      "DEVICE": "LIST_OF_DEVICES"
+    },
+    "utterances": [
+      "turn off {DEVICE}",
+      "turn off the {DEVICE}",
+      "turn off a {DEVICE}",
+      "power off {DEVICE}",
+      "power off the {DEVICE}",
+      "power off a {DEVICE}",
+      "shutdown {DEVICE}",
+      "shutdown the {DEVICE}",
+      "shutdown a {DEVICE}"
+    ]
+  }
+}

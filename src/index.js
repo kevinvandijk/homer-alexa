@@ -11,6 +11,7 @@ app.pre = function(req, res, type) {
 };
 
 require('./channels/plex')(app);
+require('./channels/power')(app);
 
 // Export both as lambda handler and as alexa-app for alexa-app-server debugging
 exports.handler = app.lambda();
