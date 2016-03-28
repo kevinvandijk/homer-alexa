@@ -40,9 +40,9 @@
       "NAME": "LIST_OF_MEDIA"
     },
     "utterances": [
-      "start {media|NAME}",
-      "start playing {media|NAME}",
-      "play {media|name}"
+      "start {NAME}",
+      "start playing {NAME}",
+      "play {NAME}"
     ]
   },
   "Yes": {
