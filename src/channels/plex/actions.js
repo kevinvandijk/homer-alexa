@@ -1,4 +1,4 @@
-var helpers = require('../../helpers');
+var homerApi = require('../../helpers').api;
 var reply = require('./reply');
 var channelName = 'plex';
 
@@ -7,7 +7,7 @@ function playRequest(res, item, options) {
   var params = { id: item.id };
   if (options.restart) params.restart = true;
 
-  return helpers.apiRequest(channelName, 'GET', 'play', params).then(function(response) {
+  return homerApi.get(channelName, 'play', params).then(function(response) {
     return reply(res, 'start-playing', response.data);
   }).catch(function(err) {
     return reply(res, 'general-error');

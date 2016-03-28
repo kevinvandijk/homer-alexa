@@ -12,25 +12,43 @@ function params(paramsObject) {
   }).join('&');
 };
 
-module.exports = {
-  apiRequest: function(channel, method, path, body) {
-    method = method.toUpperCase();
-    var url = apiUrl(channel, path) + (method === 'GET'
+function apiRequest(method, channel, path, body) {
+  method = method.toUpperCase();
+  var url = apiUrl(channel, path);
+
+  if (body) {
+    url = url + (method === 'GET'
       ? '?' + params(body)
       : ''
     );
+  }
 
-    var requestOptions = {
-      method: method,
-      uri: url,
-      headers: {
-        'Content-Type': 'application/json;charset=UTF-8'
-      },
-      json: true
-    };
+  var requestOptions = {
+    method: method,
+    uri: url,
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    json: true
+  };
 
-    if (method !== 'GET') requestOptions.body = body;
+  if (method !== 'GET') requestOptions.body = body;
 
-    return request(requestOptions);
+  return request(requestOptions);
+}
+
+module.exports = {
+  api: {
+    get: function(channel, path, body) {
+      return apiRequest('GET', channel, path, body);
+    },
+
+    put: function(channel, path, body) {
+      return apiRequest('PUT', channel, path, body);
+    },
+
+    post: function(channel, path, body) {
+      return apiRequest('POST', channel, path, body);
+    }
   }
 };
