@@ -6,7 +6,7 @@ var server = new AlexaAppServer({
   port: 3001,
   debug: true,
   server_root: __dirname,
-  app_dir: './'
+  app_dir: './src/apps'
 });
 
 server.start();

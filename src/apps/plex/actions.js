@@ -1,4 +1,4 @@
-var homerApi = require('../../helpers').api;
+var homerApi = require('./helpers').api;
 var reply = require('./reply');
 var channelName = 'plex';
 

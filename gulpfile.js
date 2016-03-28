@@ -12,6 +12,8 @@ var dotenv = require('dotenv');
 var fs = require('fs');
 var argv = require('yargs').argv;
 
+var app;
+
 dotenv.load();
 
 gulp.task('clean', function(callback) {
@@ -21,7 +23,7 @@ gulp.task('clean', function(callback) {
 });
 
 gulp.task('js', function() {
-  return gulp.src(['src/**'])
+  return gulp.src(['src/apps/' + app + '/**'])
     .pipe(gulp.dest('dist/'));
 });
 
@@ -46,7 +48,12 @@ gulp.task('upload', function(done) {
   // TODO: get all this from config file or something
   AWS.config.region = 'us-east-1';
   var lambda = new AWS.Lambda();
-  var functionName = 'homerTest';
+
+  var functionName;
+
+  if (app === 'plex') {
+    functionName = 'homer-alexa-plex';
+  }
 
   // Check if function exists:
   lambda.getFunction({FunctionName: functionName}, function(err, data) {
@@ -99,7 +106,8 @@ gulp.task('dictionary', function(callback) {
   });
 });
 
-gulp.task('deploy', function(callback) {
+gulp.task('deploy:plex', function(callback) {
+  app = 'plex';
   var tasks = ['clean'];
 
   if (argv.dictionaries) tasks.push('dictionary');
