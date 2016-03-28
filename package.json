@@ -14,10 +14,11 @@
   },
   "dependencies": {
     "alexa-app": "^2.2.0",
-    "alexa-app-server": "^2.2.4",
-    "dotenv": "^1.2.0"
+    "dotenv": "^1.2.0",
+    "request-promise": "^1.0.2"
   },
   "devDependencies": {
+    "alexa-app-server": "^2.2.4",
     "aws-sdk": "^2.2.25",
     "del": "^2.2.0",
     "gulp": "^3.9.0",

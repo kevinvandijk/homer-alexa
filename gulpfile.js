@@ -21,7 +21,7 @@ gulp.task('clean', function(callback) {
 });
 
 gulp.task('js', function() {
-  return gulp.src(['apps/plex/*', '!apps/plex/node_modules'])
+  return gulp.src(['src/**'])
     .pipe(gulp.dest('dist/'));
 });
 
@@ -82,6 +82,7 @@ gulp.task('upload', function(done) {
   });
 });
 
+// TODO: FIX THIS:
 gulp.task('dictionary', function(callback) {
   request(process.env.HOMER_ADDRESS + '/api/plex/dictionary').then(function(response) {
     return JSON.parse(response);
